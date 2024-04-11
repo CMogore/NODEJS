@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>User Management</h1><br>
+
+    <!-- Button to GET all users -->
+    <button id="getAllUsersBtn">Get All Users</button><br>
+
+    <!-- Form to GET a single user -->
+    <form id="getUserForm">
+        
+
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" name="userId">
+        <button type="button" onclick="getUser()">Get User</button>
+    </form>
+
+    <!-- Form to POST a new user -->
+    <form id="addUserForm">
+        <label for="newUserName">New User Name:</label>
+        <input type="text" id="newUserName" name="newUserName">
+        <button type="button" onclick="addUser()">Add User</button>
+    </form>
+
+    <!-- Form to PUT/update an existing user -->
+    <form id="updateUserForm">
+        <label for="updateUserId">User ID to Update:</label>
+        <input type="text" id="updateUserId" name="updateUserId">
+        <label for="updatedUserName">Updated User Name:</label>
+        <input type="text" id="updatedUserName" name="updatedUserName">
+        <button type="button" onclick="updateUser()">Update User</button>
+    </form>
+
+    <!-- Form to DELETE a user -->
+    <form id="deleteUserForm">
+        <label for="deleteUserId">User ID to Delete:</label>
+        <input type="text" id="deleteUserId" name="deleteUserId">
+        <button type="button" onclick="deleteUser()">Delete User</button>
+    </form>
+
+    <!-- Display area for response -->
+    <div id="response"></div>
+
+    <!-- JavaScript to handle form submissions -->
+    <script>
+        document.getElementById('getAllUsersBtn').addEventListener('click', function() {
+            fetch('/api/users')
+                .then(response => response.json())
+                .then(users => {
+                    const userListContainer = document.getElementById('response');
+                    userListContainer.innerHTML = ''; // Clear previous users
+                    users.forEach(user => {
+                        const userElement = document.createElement('div');
+                        userElement.textContent = `ID: ${user.id}, Name: ${user.name}`;
+                        userListContainer.appendChild(userElement);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        function getUser() {
+            const userId = document.getElementById('userId').value;
+            fetch(`/api/users/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').innerText = JSON.stringify(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function addUser() {
+            const newUserName = document.getElementById('newUserName').value;
+            fetch(`/api/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: newUserName })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').innerText = JSON.stringify(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateUser() {
+            const updateUserId = document.getElementById('updateUserId').value;
+            const updatedUserName = document.getElementById('updatedUserName').value;
+            fetch(`/api/users/${updateUserId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: updatedUserName })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').innerText = JSON.stringify(data);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function deleteUser() {
+            const deleteUserId = document.getElementById('deleteUserId').value;
+            fetch(`/api/users/${deleteUserId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.status === 204) {
+                        document.getElementById('response').innerText = 'User deleted successfully';
+                    } else {
+                        document.getElementById('response').innerText = 'User not found';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
